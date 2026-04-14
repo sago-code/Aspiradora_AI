@@ -21,6 +21,30 @@ static void imprimirVertical(const int limpieza[20], int posicion, const char* t
     }
 }
 
+static void imprimirTablaAcciones(const char* acciones[20], int posicionActual) {
+    std::cout << "Tabla de acciones:" << std::endl;
+    for (int i = 0; i < 20; i++) {
+        std::cout << "[" << i << "] ";
+        if (i <= posicionActual && acciones[i] != nullptr) {
+            std::cout << acciones[i];
+        } else {
+            std::cout << "-";
+        }
+        if (i == posicionActual) {
+            std::cout << "  <=";
+        }
+        std::cout << std::endl;
+    }
+}
+
+static void imprimirConteoAcciones(int mover, int limpiar, int nada) {
+    std::cout << "Conteo de acciones:" << std::endl;
+    std::cout << "Mover: " << mover << std::endl;
+    std::cout << "Limpiar: " << limpiar << std::endl;
+    std::cout << "Nada: " << nada << std::endl;
+    std::cout << "Total: " << (mover + limpiar + nada) << std::endl;
+}
+
 int main() {
     int limpieza[20]; // Vector de tamaño 20
 
@@ -81,49 +105,66 @@ int main() {
 
     esperarEnter("\nPresiona Enter para iniciar la aspiradora...");
 
+
+    // Tabla de acciones
+    const char* acciones[20];
+    for (int i = 0; i < 20; i++) {
+        acciones[i] = nullptr;
+    }
+
+    int conteoMover = 0;
+    int conteoLimpiar = 0;
+    int conteoNada = 0;
+
     // Simulamos la aspiradora en el entorno
     for (int i = 0; i < 20; i++) {
+        conteoMover++;
 
-        // Mostrar el estado actual del entorno
+        // Mostramos el estado actual del entorno
         std::cout << "\n";
         imprimirVertical(limpieza, i, "Aspiradora en la celda actual:");
         std::cout << "Celda [" << i << "]: " << (limpieza[i] == 1 ? "Sucio" : "Limpio") << std::endl;
 
-        // Esperar a que el usuario presione Enter para actuar
         esperarEnter("Presiona Enter para actuar...");
 
-        // Si la celda actual es sucia, la recoge
-        // Si la celda actual es limpia, no hace nada
+        // Si la celda actual sucia, la limpiamos
         if (limpieza[i] == 1) {
 
-            // Recogemos la celda actual en la aspiradora y la convierte en limpia
+            // Agregamos la índice de la celda actual al "vector" dinámico
+            // (para recogerla más tarde)
             int* nuevo = new int[tamañoAspiradora + 1];
 
-            // Copiamos los elementos actuales de la aspiradora al arreglo arreglo nuevo
+            // Copiamos los índices actuales al nuevo arreglo
             for (int j = 0; j < tamañoAspiradora; j++) {
                 nuevo[j] = aspiradora[j];
             }
 
-            // Agregamos la celda actual al arreglo arreglo nuevo
+            // Agregamos el índice de la celda actual al arreglo
             nuevo[tamañoAspiradora] = i;
 
             // Liberamos la memoria del arreglo anterior
             delete[] aspiradora;
-            
-            // Asignamos el arreglo arreglo nuevo a la aspiradora
             aspiradora = nuevo;
-
-            // Incrementamos el tamaño del arreglo arreglo nuevo
             tamañoAspiradora++;
 
-            // Convertimos la celda actual en limpia
             limpieza[i] = 0;
+            acciones[i] = "LIMPIAR";
+            conteoLimpiar++;
             std::cout << "Accion: Limpio la celda." << std::endl;
+
+        // Si la celda actual está limpia, no hacemos nada
         } else {
+            acciones[i] = "NADA";
+            conteoNada++;
             std::cout << "Accion: Nada (ya estaba limpia)." << std::endl;
         }
 
+
+        // Mostramos el estado actual del entorno
+        std::cout << "\n";
         imprimirVertical(limpieza, i, "Estado despues de la accion:");
+        imprimirTablaAcciones(acciones, i);
+        imprimirConteoAcciones(conteoMover, conteoLimpiar, conteoNada);
         esperarEnter("Presiona Enter para continuar...");
     }
 
@@ -137,6 +178,8 @@ int main() {
             std::cout << ", ";
         }
     }
+
+    // Mostramos el número total de celdas recogidas
     std::cout << "}" << std::endl;
     std::cout << "Total recogidas: " << tamañoAspiradora << std::endl;
 
